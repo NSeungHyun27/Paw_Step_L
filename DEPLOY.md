@@ -87,9 +87,22 @@ git push -u origin main
 | 항목 | 값 |
 |------|-----|
 | **Framework Preset** | Vite (자동 감지될 수 있음) |
-| **Root Directory** | `.` (루트 그대로) |
-| **Build Command** | `npm run build` |
+| **Root Directory** | **비워두기** (또는 `.`) — **반드시 루트여야 함. `backend`로 두면 126 오류 납니다.** |
+| **Build Command** | (비워두기 — `vercel.json`에서 `npx vite build` 사용) |
 | **Output Directory** | `dist` |
+| **Package Manager** | **npm** 으로 설정 (Settings → General → Package Manager) |
+
+**프로젝트 루트 구조 (Vercel은 이 루트를 기준으로 빌드해야 함):**
+```
+Paw_Step-main/
+├── package.json      ← 여기 있는 게 프론트엔드
+├── vite.config.ts
+├── index.html
+├── src/
+├── backend/          ← 백엔드(Python)는 Vercel에서 쓰지 않음
+├── vercel.json
+└── ...
+```
 
 ### 3-2. 환경 변수 설정 (중요)
 
@@ -129,6 +142,17 @@ git push -u origin main
 ---
 
 ## 자주 나오는 문제
+
+- **`npm run build exited with 126` (Vercel)**  
+  - **1)** **Root Directory**  
+    **Settings → General → Root Directory** 를 **비우기**. (`.` 또는 빈 칸.) `backend`로 되어 있으면 반드시 126 발생.
+  - **2)** **패키지 매니저**  
+    **Settings → General → Package Manager** 를 **npm** 으로 선택. (프로젝트에 `pnpm` 필드가 있어서 Vercel이 pnpm으로 인식할 수 있음 → npm으로 고정.)
+  - **3)** **Node 버전**  
+    **Settings → Environment Variables** 에 변수 추가: 이름 `NODE_VERSION`, 값 `20` (또는 `18`).  
+  - **4)** **빌드/설치 명령**  
+    루트의 `vercel.json`에서 `installCommand: "npm ci"`, `buildCommand: "npx vite build"` 로 되어 있는지 확인. (이미 적용됨.)  
+  - **5)** 변경 후 **Redeploy** (Deployments → 맨 위 배포 오른쪽 ⋮ → Redeploy).
 
 - **백엔드가 느리거나 503**  
   - Render 무료 티어는 한동안 요청 없으면 슬립됩니다. 첫 요청 시 깨우는 데 30초~1분 걸릴 수 있어요.  
